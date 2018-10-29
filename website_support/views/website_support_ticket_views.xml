@@ -89,7 +89,7 @@
             <field name="name">website.support.ticket.kanban.view</field>
             <field name="model">website.support.ticket</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="stage" create="false">
+                <kanban default_group_by="stage" create="false" class="o_kanban_small_column">
                     <field name="subject"/>
                     <field name="priority"/>
                     <field name="category"/>
@@ -99,6 +99,7 @@
                     <!-- <field name="displayed_image_id"/> -->
                     <field name="activity_ids"/>
                     <field name="message_needaction_counter"/>
+                    <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}"/>
                     <templates>
                         <t t-name="kanban-box">
                           <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
