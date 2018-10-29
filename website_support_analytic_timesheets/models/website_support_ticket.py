@@ -42,7 +42,7 @@ class WebsiteSupportTicketInheritTimesheets(models.Model):
     @api.multi
     def _compute_timesheet_project_id(self):
         
-        setting_timesheet_default_project_id = self.env['ir.default'].get('website.support.settings', 'timesheet_default_project_id')
+        setting_timesheet_default_project_id = self.env['ir.default'].get('res.config.settings', 'timesheet_default_project_id')
         
         for record in self:
         

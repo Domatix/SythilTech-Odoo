@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from openerp import api, fields, models
-from openerp import tools
+from odoo import api, fields, models
+from odoo import tools
 from random import randint
 import datetime
+import uuid
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from odoo import SUPERUSER_ID
 from dateutil import tz
@@ -10,6 +11,12 @@ from dateutil import tz
 import logging
 _logger = logging.getLogger(__name__)
 
+AVAILABLE_PRIORITIES = [
+        ('0', 'Normal'),
+        ('1', 'Low'),
+        ('2', 'High'),
+        ('3', 'Very High'),
+    ]
 
 class WebsiteSupportTicket(models.Model):
 
@@ -17,43 +24,46 @@ class WebsiteSupportTicket(models.Model):
     _description = "Website Support Ticket"
     _order = "create_date desc"
     _rec_name = "subject"
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
     _translate = True
 
     @api.model
-    def _read_group_state(self, states, domain, order):
-        """ Read group customization in order to display all the states in the
+    def _read_group_stage(self, stage, domain, order):
+        """ Read group customization in order to display all the stage in the
             kanban view, even if they are empty
         """
 
-        staff_replied_state = self.env['ir.model.data'].get_object('website_support',
-                                                                   'website_ticket_state_staff_replied')
-        customer_replied_state = self.env['ir.model.data'].get_object('website_support',
-                                                                      'website_ticket_state_customer_replied')
+        staff_replied_stage = self.env['ir.model.data'].get_object('website_support',
+                                                                   'website_ticket_stage_staff_replied')
+        customer_replied_stage = self.env['ir.model.data'].get_object('website_support',
+                                                                      'website_ticket_stage_customer_replied')
         customer_closed = self.env['ir.model.data'].get_object('website_support',
-                                                               'website_ticket_state_customer_closed')
-        staff_closed = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_staff_closed')
+                                                               'website_ticket_stage_customer_closed')
+        staff_closed = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_staff_closed')
 
-        exclude_states = [staff_replied_state.id, customer_replied_state.id, customer_closed.id, staff_closed.id]
+        exclude_stage = [staff_replied_stage.id, customer_replied_stage.id, customer_closed.id, staff_closed.id]
 
-        # state_ids = states._search([('id','not in',exclude_states)], order=order, access_rights_uid=SUPERUSER_ID)
-        state_ids = states._search([], order=order, access_rights_uid=SUPERUSER_ID)
+        # stage_ids = stage._search([('id','not in',exclude_stage)], order=order, access_rights_uid=SUPERUSER_ID)
+        stage_ids = stage._search([], order=order, access_rights_uid=SUPERUSER_ID)
 
-        return states.browse(state_ids)
+        return stage.browse(stage_ids)
 
-    def _default_state(self):
-        return self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_open')
-
-    def _default_priority_id(self):
-        default_priority = self.env['website.support.ticket.priority'].search([('sequence','=','1')])
-        return default_priority[0]
+    def _default_stage(self):
+        return self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_open')
 
     def _default_approval_id(self):
         return self.env['ir.model.data'].get_object('website_support', 'no_approval_required')
+    def _get_default_access_token(self):
+        return str(uuid.uuid4())
 
+    color = fields.Integer(string='Color Index')
+    access_token = fields.Char(
+        'Security Token', copy=False,
+        default=_get_default_access_token)
+    # displayed_image_id = fields.Many2one('ir.attachment', domain="[('res_model', '=', 'website.support.ticket'),('res_id', '=', id), ('mimetype', 'ilike', 'image')]", string='Cover Image')
     channel = fields.Char(string="Channel", default="Manual")
     create_user_id = fields.Many2one('res.users', "Create User")
-    priority_id = fields.Many2one('website.support.ticket.priority', default=_default_priority_id, string="Priority")
+    priority = fields.Selection(AVAILABLE_PRIORITIES, string="Priority", index=True, default=AVAILABLE_PRIORITIES[0][0])
     parent_company_id = fields.Many2one(string="Parent Company", related="partner_id.company_id")
     partner_id = fields.Many2one('res.partner', string="Partner")
     user_id = fields.Many2one('res.users', string="Assigned User")
@@ -64,18 +74,21 @@ class WebsiteSupportTicket(models.Model):
     sub_category_id = fields.Many2one('website.support.ticket.subcategory', string="Sub Category")
     subject = fields.Char(string="Subject")
     description = fields.Text(string="Description")
-    state = fields.Many2one('website.support.ticket.states', group_expand='_read_group_state', default=_default_state,
-                            string="State")
+    stage = fields.Many2one('website.support.ticket.stage', group_expand='_read_group_stage', default=_default_stage,
+                            string="Stage")
+    date_last_stage_update = fields.Datetime(
+        string='Last Stage Update',
+        index=True,
+        default=fields.Datetime.now)
+
     conversation_history = fields.One2many('website.support.ticket.message', 'ticket_id', string="Conversation History")
     attachment = fields.Binary(string="Attachments")
     attachment_filename = fields.Char(string="Attachment Filename")
     attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'website.support.ticket')],
                                      string="Media Attachments")
     unattended = fields.Boolean(string="Unattended", compute="_compute_unattend", store="True",
-                                help="In 'Open' state or 'Customer Replied' state taken into consideration name changes")
-    portal_access_key = fields.Char(string="Portal Access Key")
+                                help="In 'Open' stage or 'Customer Replied' stage taken into consideration name changes")
     ticket_number = fields.Char(string="Ticket Number", readonly=True)
-    ticket_color = fields.Char(related="priority_id.color", string="Ticket Color")
     company_id = fields.Many2one('res.company', string="Company",
                                  default=lambda self: self.env['res.company']._company_default_get('website.support.ticket') )
     support_rating = fields.Integer(string="Support Rating")
@@ -121,7 +134,7 @@ class WebsiteSupportTicket(models.Model):
             if active_sla_ticket.sla_response_category_id.countdown_condition == 'business_only':
                 # Check if the current time aligns with a timeslot in the settings,
                 # setting has to be set for business_only or UserError occurs
-                setting_business_hours_id = self.env['ir.default'].get('website.support.settings', 'business_hours_id')
+                setting_business_hours_id = self.env['ir.default'].get('res.config.settings', 'business_hours_id')
                 current_hour = datetime.datetime.now().hour
                 current_minute = datetime.datetime.now().minute / 60
                 current_hour_float = current_hour + current_minute
@@ -129,7 +142,7 @@ class WebsiteSupportTicket(models.Model):
                 during_work_hours = self.env['resource.calendar.attendance'].search([('calendar_id','=', setting_business_hours_id), ('dayofweek','=',day_of_week), ('hour_from','<',current_hour_float), ('hour_to','>',current_hour_float)])
 
                 # If holiday module is installed take into consideration
-                holiday_module = self.env['ir.module.module'].search([('name','=','hr_public_holidays'), ('state','=','installed')])
+                holiday_module = self.env['ir.module.module'].search([('name','=','hr_public_holidays'), ('stage','=','installed')])
                 if holiday_module:
                     holiday_today = self.env['hr.holidays.public.line'].search([('date','=',datetime.datetime.now().date())])
                     if holiday_today:
@@ -243,7 +256,7 @@ class WebsiteSupportTicket(models.Model):
         defaults['description'] = tools.html_sanitize(msg.get('body'))
 
         #Assign to default category
-        setting_email_default_category_id = self.env['ir.default'].get('website.support.settings', 'email_default_category_id')
+        setting_email_default_category_id = self.env['ir.default'].get('res.config.settings', 'email_default_category_id')
 
         if setting_email_default_category_id:
             defaults['category'] = setting_email_default_category_id
@@ -261,22 +274,22 @@ class WebsiteSupportTicket(models.Model):
 
         #If the to email address is to the customer then it must be a staff member
         if msg_dict.get('to') == self.email:
-            change_state = self.env['ir.model.data'].get_object('website_support','website_ticket_state_staff_replied')
+            change_stage = self.env['ir.model.data'].get_object('website_support','website_ticket_stage_staff_replied')
         else:
-            change_state = self.env['ir.model.data'].get_object('website_support','website_ticket_state_customer_replied')
+            change_stage = self.env['ir.model.data'].get_object('website_support','website_ticket_stage_customer_replied')
 
-        self.state = change_state.id
+        self.stage = change_stage.id
 
         return super(WebsiteSupportTicket, self).message_update(msg_dict, update_vals=update_vals)
 
     @api.one
-    @api.depends('state')
+    @api.depends('stage')
     def _compute_unattend(self):
-        #BACK COMPATABLITY Use open and customer reply as default unattended states
-        opened_state = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_open')
-        customer_replied_state = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_customer_replied')
+        #BACK COMPATABLITY Use open and customer reply as default unattended stage
+        opened_stage = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_open')
+        customer_replied_stage = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_customer_replied')
 
-        if self.state == opened_state or self.state == customer_replied_state or self.state.unattended == True:
+        if self.stage == opened_stage or self.stage == customer_replied_stage or self.stage.unattended == True:
             self.unattended = True
 
     @api.multi
@@ -313,9 +326,9 @@ class WebsiteSupportTicket(models.Model):
 
     @api.model
     def _needaction_domain_get(self):
-        open_state = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_open')
-        custom_replied_state = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_customer_replied')
-        return ['|',('state', '=', open_state.id ), ('state', '=', custom_replied_state.id)]
+        open_stage = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_open')
+        custom_replied_stage = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_customer_replied')
+        return ['|',('stage', '=', open_stage.id ), ('stage', '=', custom_replied_stage.id)]
 
     @api.model
     def create(self, vals):
@@ -324,9 +337,7 @@ class WebsiteSupportTicket(models.Model):
 
         new_id = super(WebsiteSupportTicket, self).create(vals)
 
-        new_id.portal_access_key = randint(1000000000,2000000000)
-
-        ticket_open_email_template = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_open').mail_template_id
+        ticket_open_email_template = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_open').mail_template_id
         ticket_open_email_template.send_mail(new_id.id, True)
 
         #Check if this contact has a SLA assigned
@@ -361,10 +372,11 @@ class WebsiteSupportTicket(models.Model):
     def write(self, values, context=None):
 
         update_rec = super(WebsiteSupportTicket, self).write(values)
-
-        if 'state' in values:
-            if self.state.mail_template_id:
-                self.state.mail_template_id.send_mail(self.id, True)
+        now = fields.Datetime.now()
+        if 'stage' in values:
+            if self.stage.mail_template_id:
+                self.stage.mail_template_id.send_mail(self.id, True)
+                self.date_last_stage_update = now
 
         #Email user if category has changed
         if 'category' in values:
@@ -372,7 +384,7 @@ class WebsiteSupportTicket(models.Model):
             change_category_email.send_mail(self.id, True)
 
         if 'user_id' in values:
-            setting_change_user_email_template_id = self.env['ir.default'].get('website.support.settings', 'change_user_email_template_id')
+            setting_change_user_email_template_id = self.env['ir.default'].get('res.config.settings', 'change_user_email_template_id')
 
             if setting_change_user_email_template_id:
                 email_template = self.env['mail.template'].browse(setting_change_user_email_template_id)
@@ -390,14 +402,13 @@ class WebsiteSupportTicket(models.Model):
             send_mail = self.env['mail.mail'].create(email_values)
             send_mail.send()
 
-
         return update_rec
 
     def send_survey(self):
 
         notification_template = self.env['ir.model.data'].sudo().get_object('website_support', 'support_ticket_survey')
         values = notification_template.generate_email(self.id)
-        surevey_url = "support/survey/" + str(self.portal_access_key)
+        surevey_url = "support/survey/" + str(self.access_token)
         values['body_html'] = values['body_html'].replace("_survey_url_",surevey_url)
         send_mail = self.env['mail.mail'].create(values)
         send_mail.send(True)
@@ -465,34 +476,26 @@ class WebsiteSupportTicketSubCategoryField(models.Model):
     name = fields.Char(string="Label", required="True")
     type = fields.Selection([('textbox','Textbox')], default="textbox", required="True", string="Type")
 
-class WebsiteSupportTicketStates(models.Model):
+class WebsiteSupportTicketstage(models.Model):
 
-    _name = "website.support.ticket.states"
+    _name = "website.support.ticket.stage"
 
-    name = fields.Char(required=True, translate=True, string='State Name')
-    mail_template_id = fields.Many2one('mail.template', domain="[('model_id','=','website.support.ticket')]", string="Mail Template", help="The mail message that the customer gets when the state changes")
-    unattended = fields.Boolean(string="Unattended", help="If ticked, tickets in this state will appear by default")
-
-class WebsiteSupportTicketPriority(models.Model):
-
-    _name = "website.support.ticket.priority"
-    _order = "sequence asc"
-
-    sequence = fields.Integer(string="Sequence")
-    name = fields.Char(required=True, translate=True, string="Priority Name")
-    color = fields.Char(string="Color")
-
-    @api.model
-    def create(self, values):
-        sequence=self.env['ir.sequence'].next_by_code('website.support.ticket.priority')
-        values['sequence']=sequence
-        return super(WebsiteSupportTicketPriority, self).create(values)
+    name = fields.Char(required=True, translate=True, string='Name')
+    mail_template_id = fields.Many2one('mail.template', domain="[('model_id','=','website.support.ticket')]", string="Mail Template", help="The mail message that the customer gets when the stage changes")
+    unattended = fields.Boolean(string="Unattended", help="If ticked, tickets in this stage will appear by default")
+    fold = fields.Boolean(string='Folded in Kanban',
+        help='This stage is folded in the kanban view when there are no records in that stage to display.')
 
 class WebsiteSupportTicketTag(models.Model):
 
     _name = "website.support.ticket.tag"
 
     name = fields.Char(required=True, translate=True, string="Tag Name")
+    color = fields.Integer(string='Color Index', default=10)
+
+    _sql_constraints = [
+        ('name_uniq', 'unique (name)', "Tag name already exists !"),
+    ]
 
 class WebsiteSupportTicketUsers(models.Model):
 
@@ -517,27 +520,27 @@ class WebsiteSupportTicketCompose(models.Model):
         diff_time = datetime.datetime.strptime(self.ticket_id.close_time, DEFAULT_SERVER_DATETIME_FORMAT) - datetime.datetime.strptime(self.ticket_id.create_date, DEFAULT_SERVER_DATETIME_FORMAT)
         self.ticket_id.time_to_close = diff_time.seconds
 
-        closed_state = self.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_state_staff_closed')
+        closed_stage = self.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_stage_staff_closed')
 
-        #We record state change manually since it would spam the chatter if every 'Staff Replied' and 'Customer Replied' gets recorded
-        message = "<ul class=\"o_mail_thread_message_tracking\">\n<li>State:<span> " + self.ticket_id.state.name + " </span><b>-></b> " + closed_state.name + " </span></li></ul>"
+        #We record stage change manually since it would spam the chatter if every 'Staff Replied' and 'Customer Replied' gets recorded
+        message = "<ul class=\"o_mail_thread_message_tracking\">\n<li>stage:<span> " + self.ticket_id.stage.name + " </span><b>-></b> " + closed_stage.name + " </span></li></ul>"
         self.ticket_id.message_post(body=message, subject="Ticket Closed by Staff")
 
         self.ticket_id.close_comment = self.message
         self.ticket_id.closed_by_id = self.env.user.id
-        self.ticket_id.state = closed_state.id
+        self.ticket_id.stage = closed_stage.id
 
         self.ticket_id.sla_active = False
 
         #Auto send out survey
-        setting_auto_send_survey = self.env['ir.default'].get('website.support.settings', 'auto_send_survey')
+        setting_auto_send_survey = self.env['ir.default'].get('res.config.settings', 'auto_send_survey')
         if setting_auto_send_survey:
             self.ticket_id.send_survey()
 
-        closed_state_mail_template = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_staff_closed').mail_template_id
+        closed_stage_mail_template = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_staff_closed').mail_template_id
 
-        if closed_state_mail_template:
-            closed_state_mail_template.send_mail(self.ticket_id.id, True)
+        if closed_stage_mail_template:
+            closed_stage_mail_template.send_mail(self.ticket_id.id, True)
 
 class WebsiteSupportTicketCompose(models.Model):
 
@@ -561,11 +564,11 @@ class WebsiteSupportTicketCompose(models.Model):
     @api.one
     def send_reply(self):
 
-        #Change the approval state before we send the mail
+        #Change the approval stage before we send the mail
         if self.approval:
-            #Change the ticket state to awaiting approval
-            awaiting_approval_state = self.env['ir.model.data'].get_object('website_support','website_ticket_state_awaiting_approval')
-            self.ticket_id.state = awaiting_approval_state.id
+            #Change the ticket stage to awaiting approval
+            awaiting_approval_stage = self.env['ir.model.data'].get_object('website_support','website_ticket_stage_awaiting_approval')
+            self.ticket_id.stage = awaiting_approval_stage.id
 
             #One support request per ticket...
             self.ticket_id.planned_time = self.planned_time
@@ -575,7 +578,7 @@ class WebsiteSupportTicketCompose(models.Model):
         #Send email
         values = {}
 
-        setting_staff_reply_email_template_id = self.env['ir.default'].get('website.support.settings', 'staff_reply_email_template_id')
+        setting_staff_reply_email_template_id = self.env['ir.default'].get('res.config.settings', 'staff_reply_email_template_id')
 
         if setting_staff_reply_email_template_id:
             email_wrapper = self.env['mail.template'].browse(setting_staff_reply_email_template_id)
@@ -597,6 +600,6 @@ class WebsiteSupportTicketCompose(models.Model):
             awaiting_approval = self.env['ir.model.data'].get_object('website_support','awaiting_approval')
             self.ticket_id.approval_id = awaiting_approval.id
         else:
-            #Change the ticket state to staff replied
-            staff_replied = self.env['ir.model.data'].get_object('website_support','website_ticket_state_staff_replied')
-            self.ticket_id.state = staff_replied.id
+            #Change the ticket stage to staff replied
+            staff_replied = self.env['ir.model.data'].get_object('website_support','website_ticket_stage_staff_replied')
+            self.ticket_id.stage = staff_replied.id

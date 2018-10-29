@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+      <!-- <record id="website_support_ticket_stage_view_form" model="ir.ui.view">
+          <field name="name">website.support.ticket.stage.form.view</field>
+          <field name="model">website.support.ticket.stage</field>
+          <field name="arch" type="xml">
+      	      <form>
+      	          <group>
+      	              <field name="name"/>
+      	              <field name="mail_template_id" context="{'default_model':'website.support.ticket'}"/>
+      	              <field name="unattended"/>
+      	              <field name="fold"/>
+      	          </group>
+      	      </form>
+      	  </field>
+      </record> -->
+
+      <record id="website_support_ticket_stage_view_tree" model="ir.ui.view">
+          <field name="name">website.support.ticket.stage.tree.view</field>
+          <field name="model">website.support.ticket.stage</field>
+          <field name="arch" type="xml">
+      	      <tree editable="bottom">
+      	          <field name="name"/>
+      	          <field name="mail_template_id"/>
+      	          <field name="unattended"/>
+      	          <field name="fold"/>
+      	      </tree>
+      	  </field>
+      </record>
+
+      <record id="website_support_ticket_stage_action" model="ir.actions.act_window">
+          <field name="name">Support Ticket Stages</field>
+      	  <field name="res_model">website.support.ticket.stage</field>
+      	  <field name="view_type">form</field>
+      	  <field name="view_mode">tree</field>
+      	  <field name="help" type="html">
+	      <p class="oe_view_nocontent_create">Create support ticket stage</p>
+	  </field>
+      </record>
+
+    </data>
+</odoo>

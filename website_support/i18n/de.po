@@ -23,9 +23,9 @@ msgid ""
 "\n"
 "                ${object.body|safe}\n"
 "                <hr/>\n"
-"                 % if object.ticket_id.portal_access_key :\n"
+"                 % if object.ticket_id.access_token :\n"
 "                     <b>View Ticket Online:</b> <a href=\"/support/portal/"
-"ticket/view/${object.ticket_id.portal_access_key}\">here</a><br/>\n"
+"ticket/view/${object.ticket_id.access_token}\">here</a><br/>\n"
 "                 % endif\n"
 "                <b>Ticket Number:</b> ${object.ticket_id.id}<br/>\n"
 "                <b>Ticket Category:</b> ${object.ticket_id.category.name or "
@@ -39,9 +39,9 @@ msgstr ""
 "\n"
 "                ${object.body|safe}\n"
 "                <hr/>\n"
-"                 % if object.ticket_id.portal_access_key :\n"
+"                 % if object.ticket_id.access_token :\n"
 "                     <b> Ticket Online:</b> <a href=\"/support/portal/ticket/"
-"view/${object.ticket_id.portal_access_key}\">here</a><br/>\n"
+"view/${object.ticket_id.access_token}\">here</a><br/>\n"
 "                 % endif\n"
 "                <b>Ticket Nummer:</b> ${object.ticket_id.id}<br/>\n"
 "                <b>Ticket Kategorie:</b> ${object.ticket_id.category.name or "
@@ -58,9 +58,9 @@ msgid ""
 "\n"
 "                ${object.body|safe}\n"
 "                <hr/>\n"
-"                % if object.ticket_id.portal_access_key :\n"
+"                % if object.ticket_id.access_token :\n"
 "                    <b>View Ticket Online:</b> <a href=\"/support/portal/"
-"ticket/view/${object.ticket_id.portal_access_key}\">here</a><br/>\n"
+"ticket/view/${object.ticket_id.access_token}\">here</a><br/>\n"
 "                % endif\n"
 "                <b>Ticket Number:</b> ${object.ticket_id.id}<br/>\n"
 "                <b>Ticket Category:</b> ${object.ticket_id.category.name or "
@@ -74,9 +74,9 @@ msgstr ""
 "\n"
 "                ${object.body|safe}\n"
 "                <hr/>\n"
-"                 % if object.ticket_id.portal_access_key :\n"
+"                 % if object.ticket_id.access_token :\n"
 "                     <b> Ticket Online:</b> <a href=\"/support/portal/ticket/"
-"view/${object.ticket_id.portal_access_key}\">here</a><br/>\n"
+"view/${object.ticket_id.access_token}\">here</a><br/>\n"
 "                 % endif\n"
 "                <b>Ticket Nummer:</b> ${object.ticket_id.id}<br/>\n"
 "                <b>Ticket Kategorie:</b> ${object.ticket_id.category.name or "
@@ -98,7 +98,7 @@ msgid ""
 "get back to your shortly</p>\n"
 "                <hr/>\n"
 "                <b>View Ticket Online:</b> <a href=\"/support/portal/ticket/"
-"view/${object.portal_access_key}\">here</a><br/>\n"
+"view/${object.access_token}\">here</a><br/>\n"
 "                <b>Ticket Number:</b> ${object.ticket_number or object.id}"
 "<br/>\n"
 "                <b>Ticket Category:</b> \n"
@@ -120,7 +120,7 @@ msgstr ""
 "uns, wir werden uns umgehend bei Ihnen melden</p>\n"
 "                <hr/>\n"
 "                <b>Gehe zu Ticket Online:</b> <a href=\"/support/portal/"
-"ticket/view/${object.portal_access_key}\">here</a><br/>\n"
+"ticket/view/${object.access_token}\">here</a><br/>\n"
 "                <b>Ticket Number:</b> ${object.ticket_number or object.id}"
 "<br/>\n"
 "                <b>Ticket Category:</b> \n"
@@ -398,7 +398,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website_support.support_ticket_view
 msgid ""
 "<br/>\n"
-"                <b>State</b>"
+"                <b>stage</b>"
 msgstr ""
 "<br/>\n"
 "                <b>Status</b>"
@@ -668,8 +668,8 @@ msgid "Create new sub category"
 msgstr "Erstellen Sie eine neue Unterkategorie"
 
 #. module: website_support
-#: model:ir.actions.act_window,help:website_support.website_support_ticket_states_action
-msgid "Create support ticket state"
+#: model:ir.actions.act_window,help:website_support.website_support_ticket_stage_action
+msgid "Create support ticket stage"
 msgstr "Erstellen Sie einen Support-Ticket-Status"
 
 #. module: website_support
@@ -694,7 +694,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_create_uid
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_message_create_uid
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_create_uid
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_create_uid
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_create_uid
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_subcategory_create_uid
 msgid "Created by"
 msgstr "Erstellt von"
@@ -715,7 +715,7 @@ msgstr "Erstellt von"
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_create_date
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_message_create_date
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_create_date
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_create_date
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_create_date
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_subcategory_create_date
 msgid "Created on"
 msgstr "Angelegt am"
@@ -726,12 +726,12 @@ msgid "Customer"
 msgstr "Kunde"
 
 #. module: website_support
-#: model:website.support.ticket.states,name:website_support.website_ticket_state_customer_closed
+#: model:website.support.ticket.stage,name:website_support.website_ticket_stage_customer_closed
 msgid "Customer Closed"
 msgstr "Kunde Geschlossen"
 
 #. module: website_support
-#: model:website.support.ticket.states,name:website_support.website_ticket_state_customer_replied
+#: model:website.support.ticket.stage,name:website_support.website_ticket_stage_customer_replied
 msgid "Customer Replied"
 msgstr "Kunde geantwortet"
 
@@ -778,7 +778,7 @@ msgstr "Beschreibung"
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_display_name
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_message_display_name
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_display_name
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_display_name
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_display_name
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_subcategory_display_name
 msgid "Display Name"
 msgstr "Anzeigename"
@@ -837,7 +837,7 @@ msgid "Group"
 msgstr "Gruppe"
 
 #. module: website_support
-#. openerp-web
+#. odoo-web
 #: code:addons/website_support/static/src/js/website_support.editor.js:46
 #: model:ir.model.fields,field_description:website_support.field_website_support_help_groups_name
 #, python-format
@@ -880,8 +880,8 @@ msgstr "Hoch"
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_compose_id
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_id
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_message_id
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_id_8681
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_id
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_8681
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_id
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_subcategory_id
 msgid "ID"
 msgstr "ID"
@@ -889,7 +889,7 @@ msgstr "ID"
 #. module: website_support
 #: model:ir.model.fields,help:website_support.field_website_support_ticket_unattended
 msgid ""
-"In 'Open' state or 'Customer Replied' state taken into consideration name "
+"In 'Open' stage or 'Customer Replied' stage taken into consideration name "
 "changes"
 msgstr "Im Status 'Offen' oder 'Kundenbeantwortet' ändert sich ev. der Name"
 
@@ -909,7 +909,7 @@ msgstr "Im Status 'Offen' oder 'Kundenbeantwortet' ändert sich ev. der Name"
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_compose___last_update
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_message___last_update
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority___last_update
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states___last_update
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage___last_update
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_subcategory___last_update
 msgid "Last Modified on"
 msgstr "Zuletzt geändert am"
@@ -929,7 +929,7 @@ msgstr "Zuletzt geändert am"
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_compose_write_uid
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_message_write_uid
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_write_uid
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_write_uid
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_write_uid
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_subcategory_write_uid
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_write_uid
 msgid "Last Updated by"
@@ -950,7 +950,7 @@ msgstr "Zuletzt aktualisiert durch"
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_compose_write_date
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_message_write_date
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_write_date
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_write_date
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_write_date
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_subcategory_write_date
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_write_date
 msgid "Last Updated on"
@@ -963,7 +963,7 @@ msgstr "Tief"
 
 #. module: website_support
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_compose_template_id
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_mail_template_id
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_mail_template_id
 msgid "Mail Template"
 msgstr "Mail Template"
 
@@ -1030,7 +1030,7 @@ msgid "New Event"
 msgstr "Neuer Anlass"
 
 #. module: website_support
-#. openerp-web
+#. odoo-web
 #: code:addons/website_support/static/src/js/website_support.editor.js:45
 #: model:ir.ui.view,arch_db:website_support.content_new_help
 #, python-format
@@ -1038,7 +1038,7 @@ msgid "New Help Group"
 msgstr "Neue Hilfeseite Gruppe"
 
 #. module: website_support
-#. openerp-web
+#. odoo-web
 #: code:addons/website_support/static/src/js/website_support.editor.js:16
 #: model:ir.ui.view,arch_db:website_support.content_new_help
 #, python-format
@@ -1088,7 +1088,7 @@ msgid "Number of Pages"
 msgstr "Seitenzahl"
 
 #. module: website_support
-#: model:website.support.ticket.states,name:website_support.website_ticket_state_open
+#: model:website.support.ticket.stage,name:website_support.website_ticket_stage_open
 msgid "Open"
 msgstr "Offen"
 
@@ -1135,7 +1135,7 @@ msgid "Please give us feedback on our support service"
 msgstr "Bitte geben Sie uns Feedback zu unserem Support-Service"
 
 #. module: website_support
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_portal_access_key
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_access_token
 msgid "Portal Access Key"
 msgstr "Portal Access Key"
 
@@ -1145,7 +1145,7 @@ msgid "Priorities"
 msgstr "Prioritäten"
 
 #. module: website_support
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority_id
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_priority
 msgid "Priority"
 msgstr "Priorität"
 
@@ -1241,12 +1241,12 @@ msgid "Staff"
 msgstr "Mitarbeiter"
 
 #. module: website_support
-#: model:website.support.ticket.states,name:website_support.website_ticket_state_staff_closed
+#: model:website.support.ticket.stage,name:website_support.website_ticket_stage_staff_closed
 msgid "Staff Closed"
 msgstr "Durch Mitarbeiter geschlossen"
 
 #. module: website_support
-#: model:website.support.ticket.states,name:website_support.website_ticket_state_staff_replied
+#: model:website.support.ticket.stage,name:website_support.website_ticket_stage_staff_replied
 msgid "Staff Replied"
 msgstr "Durch Mitarbeiter beantwortet"
 
@@ -1256,19 +1256,19 @@ msgid "Staff Reply Email Template"
 msgstr "Mitarbeiter Antwort Email Template"
 
 #. module: website_support
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_state
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage
 #: model:ir.ui.view,arch_db:website_support.support_ticket_view_list
-msgid "State"
+msgid "stage"
 msgstr "Ticket Status"
 
 #. module: website_support
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_states_name
-msgid "State Name"
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_stage_name
+msgid "stage Name"
 msgstr "Status Name"
 
 #. module: website_support
-#: model:ir.ui.menu,name:website_support.website_support_ticket_states_menu
-msgid "States"
+#: model:ir.ui.menu,name:website_support.website_support_ticket_stage_menu
+msgid "stage"
 msgstr "Status"
 
 #. module: website_support
@@ -1394,8 +1394,8 @@ msgid "Support Ticket Settings"
 msgstr "Support Ticket Settings"
 
 #. module: website_support
-#: model:ir.actions.act_window,name:website_support.website_support_ticket_states_action
-msgid "Support Ticket States"
+#: model:ir.actions.act_window,name:website_support.website_support_ticket_stage_action
+msgid "Support Ticket stage"
 msgstr "Support Ticket Statuse"
 
 #. module: website_support
@@ -1652,8 +1652,8 @@ msgstr "website.support.help.page.feedback"
 
 #. module: website_support
 #: model:ir.model,name:website_support.model_website_support_settings
-msgid "website.support.settings"
-msgstr "website.support.settings"
+msgid "res.config.settings"
+msgstr "res.config.settings"
 
 #. module: website_support
 #: model:ir.model,name:website_support.model_website_support_ticket_categories
@@ -1681,9 +1681,9 @@ msgid "website.support.ticket.priority"
 msgstr "website.support.ticket.priority"
 
 #. module: website_support
-#: model:ir.model,name:website_support.model_website_support_ticket_states
-msgid "website.support.ticket.states"
-msgstr "website.support.ticket.states"
+#: model:ir.model,name:website_support.model_website_support_ticket_stage
+msgid "website.support.ticket.stage"
+msgstr "website.support.ticket.stage"
 
 #. module: website_support
 #: model:ir.model,name:website_support.model_website_support_ticket_subcategory

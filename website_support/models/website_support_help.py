@@ -2,9 +2,9 @@
 import unicodedata
 import re
 
-from openerp import api, fields, models
-from openerp.http import request
-from openerp.tools import html_escape as escape, ustr, image_resize_and_sharpen, image_save_for_web
+from odoo import api, fields, models
+from odoo.http import request
+from odoo.tools import html_escape as escape, ustr, image_resize_and_sharpen, image_save_for_web
 
 from odoo.addons.http_routing.models.ir_http import slug
 

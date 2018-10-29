@@ -4,7 +4,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 from odoo.exceptions import UserError
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 class WebsiteSupportSLA(models.Model):
 
@@ -41,7 +41,7 @@ class WebsiteSupportSLAResponse(models.Model):
     
         #Setting for business hours has to be set before they can use business hours only SLA option
         if values['countdown_condition'] == 'business_only':
-            setting_business_hours_id = self.env['ir.default'].get('website.support.settings', 'business_hours_id')
+            setting_business_hours_id = self.env['ir.default'].get('res.config.settings', 'business_hours_id')
             if setting_business_hours_id is None:
                 raise UserError("Please set business hours in settings before using this option")
 

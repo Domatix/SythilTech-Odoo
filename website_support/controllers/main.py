@@ -1,19 +1,23 @@
-# -*- coding: utf-8 -*-
 import werkzeug
 import json
 import base64
-from random import randint
-import os
 import datetime
 import requests
 import logging
+import odoo.http as http
+from odoo.http import request
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.addons.portal.controllers.portal import get_records_pager
+from odoo.addons.http_routing.models.ir_http import slug
 _logger = logging.getLogger(__name__)
 
-import openerp.http as http
-from openerp.http import request
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
+AVAILABLE_PRIORITIES = [
+        ('0', 'Normal'),
+        ('1', 'Low'),
+        ('2', 'High'),
+        ('3', 'Very High'),
+    ]
 
-from odoo.addons.http_routing.models.ir_http import slug
 
 class SupportTicketController(http.Controller):
 
@@ -24,9 +28,9 @@ class SupportTicketController(http.Controller):
         awaiting_approval = request.env['ir.model.data'].get_object('website_support','awaiting_approval')
 
         if support_ticket.approval_id.id == awaiting_approval.id:
-            #Change the ticket state to approved
-            website_ticket_state_approval_accepted = request.env['ir.model.data'].get_object('website_support','website_ticket_state_approval_accepted')
-            support_ticket.state = website_ticket_state_approval_accepted.id
+            #Change the ticket stage to approved
+            website_ticket_stage_approval_accepted = request.env['ir.model.data'].get_object('website_support','website_ticket_stage_approval_accepted')
+            support_ticket.stage = website_ticket_stage_approval_accepted.id
 
             #Also change the approval
             approval_accepted = request.env['ir.model.data'].get_object('website_support','approval_accepted')
@@ -47,7 +51,7 @@ class SupportTicketController(http.Controller):
                 send_mail.send()
 
                 #Remove the message from the chatter since this would bloat the communication history by a lot
-                send_mail.mail_message_id.res_id = 0            
+                send_mail.mail_message_id.res_id = 0
 
             return "Request Approved Successfully"
         else:
@@ -60,9 +64,9 @@ class SupportTicketController(http.Controller):
         awaiting_approval = request.env['ir.model.data'].get_object('website_support','awaiting_approval')
 
         if support_ticket.approval_id.id == awaiting_approval.id:
-            #Change the ticket state to disapproved
-            website_ticket_state_approval_rejected = request.env['ir.model.data'].get_object('website_support','website_ticket_state_approval_rejected')
-            support_ticket.state = website_ticket_state_approval_rejected.id
+            #Change the ticket stage to disapproved
+            website_ticket_stage_approval_rejected = request.env['ir.model.data'].get_object('website_support','website_ticket_stage_approval_rejected')
+            support_ticket.stage = website_ticket_stage_approval_rejected.id
 
             #Also change the approval
             approval_rejected = request.env['ir.model.data'].get_object('website_support','approval_rejected')
@@ -84,7 +88,7 @@ class SupportTicketController(http.Controller):
 
                 #Remove the message from the chatter since this would bloat the communication history by a lot
                 send_mail.mail_message_id.res_id = 0
-                
+
             return "Request Rejected Successfully"
         else:
             return "Ticket does not need approval"
@@ -150,7 +154,7 @@ class SupportTicketController(http.Controller):
     def support_ticket_survey(self, portal_key):
         """Display the survey"""
 
-        support_ticket = request.env['website.support.ticket'].search([('portal_access_key','=', portal_key)])
+        support_ticket = request.env['website.support.ticket'].search([('access_token','=', portal_key)])
 
         if support_ticket.support_rating:
             #TODO some security incase they guess the portal key of an incomplete survey
@@ -167,7 +171,7 @@ class SupportTicketController(http.Controller):
         for field_name, field_value in kw.items():
             values[field_name] = field_value
 
-        support_ticket = request.env['website.support.ticket'].search([('portal_access_key','=', portal_key)])
+        support_ticket = request.env['website.support.ticket'].search([('access_token','=', portal_key)])
 
         if support_ticket.support_rating:
             #TODO some security incase they guess the portal key of an incomplete survey
@@ -181,7 +185,7 @@ class SupportTicketController(http.Controller):
     def support_account_create(self, **kw):
         """  Create no permission account"""
 
-        setting_allow_user_signup = request.env['ir.default'].get('website.support.settings', 'allow_user_signup')
+        setting_allow_user_signup = request.env['ir.default'].get('res.config.settings', 'allow_user_signup')
 
         if setting_allow_user_signup:
             return http.request.render('website_support.account_create', {})
@@ -192,10 +196,10 @@ class SupportTicketController(http.Controller):
     def support_account_create_process(self, **kw):
         """  Create no permission account"""
 
-        setting_allow_user_signup = request.env['ir.default'].get('website.support.settings', 'allow_user_signup')
+        setting_allow_user_signup = request.env['ir.default'].get('res.config.settings', 'allow_user_signup')
 
         if setting_allow_user_signup:
- 
+
             values = {}
             for field_name, field_value in kw.items():
                 values[field_name] = field_value
@@ -233,7 +237,7 @@ class SupportTicketController(http.Controller):
 
         help_groups = http.request.env['website.support.help.groups'].sudo().search(['|', ('partner_ids', '=', False ), ('partner_ids', '=', request.env.user.partner_id.id ),'|', ('group_ids', '=', False ), ('group_ids', 'in', permission_list ), ('website_published','=',True)])
 
-        setting_allow_user_signup = request.env['ir.default'].get('website.support.settings', 'allow_user_signup')
+        setting_allow_user_signup = request.env['ir.default'].get('res.config.settings', 'allow_user_signup')
 
         manager = False
         if request.env['website.support.department.contact'].sudo().search_count([('user_id','=',request.env.user.id)]) == 1:
@@ -252,7 +256,7 @@ class SupportTicketController(http.Controller):
         for extra_permission in department.partner_ids:
             extra_access.append(extra_permission.id)
 
-        support_tickets = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False) ])        
+        support_tickets = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False) ])
 
         support_ticket_count = len(support_tickets)
 
@@ -268,16 +272,16 @@ class SupportTicketController(http.Controller):
         category_access = []
         for category_permission in http.request.env.user.groups_id:
             category_access.append(category_permission.id)
-            
+
         ticket_categories = http.request.env['website.support.ticket.categories'].sudo().search(['|',('access_group_ids','in', category_access), ('access_group_ids','=',False)])
 
-        setting_google_recaptcha_active = request.env['ir.default'].get('website.support.settings', 'google_recaptcha_active')
-        setting_google_captcha_client_key = request.env['ir.default'].get('website.support.settings', 'google_captcha_client_key')
-        setting_max_ticket_attachments = request.env['ir.default'].get('website.support.settings', 'max_ticket_attachments')
-        setting_max_ticket_attachment_filesize = request.env['ir.default'].get('website.support.settings', 'max_ticket_attachment_filesize')
-        setting_allow_website_priority_set = request.env['ir.default'].get('website.support.settings', 'allow_website_priority_set')
-        
-        return http.request.render('website_support.support_submit_ticket', {'categories': ticket_categories, 'priorities': http.request.env['website.support.ticket.priority'].sudo().search([]), 'person_name': person_name, 'email': http.request.env.user.email, 'setting_max_ticket_attachments': setting_max_ticket_attachments, 'setting_max_ticket_attachment_filesize': setting_max_ticket_attachment_filesize, 'setting_google_recaptcha_active': setting_google_recaptcha_active, 'setting_google_captcha_client_key': setting_google_captcha_client_key, 'setting_allow_website_priority_set': setting_allow_website_priority_set})
+        setting_google_recaptcha_active = request.env['ir.default'].get('res.config.settings', 'google_recaptcha_active')
+        setting_google_captcha_client_key = request.env['ir.default'].get('res.config.settings', 'google_captcha_client_key')
+        setting_max_ticket_attachments = request.env['ir.default'].get('res.config.settings', 'max_ticket_attachments')
+        setting_max_ticket_attachment_filesize = request.env['ir.default'].get('res.config.settings', 'max_ticket_attachment_filesize')
+        setting_allow_website_priority_set = request.env['ir.default'].get('res.config.settings', 'allow_website_priority_set')
+
+        return http.request.render('website_support.support_submit_ticket', {'categories': ticket_categories, 'priorities': AVAILABLE_PRIORITIES, 'person_name': person_name, 'email': http.request.env.user.email, 'setting_max_ticket_attachments': setting_max_ticket_attachments, 'setting_max_ticket_attachment_filesize': setting_max_ticket_attachment_filesize, 'setting_google_recaptcha_active': setting_google_recaptcha_active, 'setting_google_captcha_client_key': setting_google_captcha_client_key, 'setting_allow_website_priority_set': setting_allow_website_priority_set})
 
     @http.route('/support/feedback/process/<help_page>', type="http", auth="public", website=True)
     def support_feedback(self, help_page, **kw):
@@ -337,12 +341,12 @@ class SupportTicketController(http.Controller):
         if values['my_gold'] != "256":
             return "Bot Detected"
 
-        setting_google_recaptcha_active = request.env['ir.default'].get('website.support.settings', 'google_recaptcha_active')
-        setting_allow_website_priority_set = request.env['ir.default'].get('website.support.settings', 'allow_website_priority_set')
-            
+        setting_google_recaptcha_active = request.env['ir.default'].get('res.config.settings', 'google_recaptcha_active')
+        setting_allow_website_priority_set = request.env['ir.default'].get('res.config.settings', 'allow_website_priority_set')
+
         if setting_google_recaptcha_active:
 
-            setting_google_captcha_secret_key = request.env['ir.default'].get('website.support.settings', 'google_captcha_secret_key')
+            setting_google_captcha_secret_key = request.env['ir.default'].get('res.config.settings', 'google_captcha_secret_key')
 
             #Redirect them back if they didn't answer the captcha
             if 'g-recaptcha-response' not in values:
@@ -353,7 +357,7 @@ class SupportTicketController(http.Controller):
 
             if response_json.json()['success'] is not True:
                 return werkzeug.utils.redirect("/support/ticket/submit")
-                
+
         my_attachment = ""
         file_name = ""
 
@@ -372,7 +376,7 @@ class SupportTicketController(http.Controller):
             partner.message_post(body="Customer " + partner.name + " has sent in a new support ticket", subject="New Support Ticket")
 
             if 'priority' in values and (setting_allow_website_priority_set == "partner" or setting_allow_website_priority_set == "everyone"):
-                new_ticket_id.priority_id = int(values['priority'])
+                new_ticket_id.priority = values['priority']
         else:
             search_partner = request.env['res.partner'].sudo().search([('email','=', values['email'] )])
 
@@ -382,8 +386,8 @@ class SupportTicketController(http.Controller):
                 new_ticket_id = request.env['website.support.ticket'].sudo().create({'person_name':values['person_name'], 'category':values['category'], 'sub_category_id': sub_category, 'email':values['email'], 'description':values['description'], 'subject':values['subject'], 'attachment': my_attachment, 'attachment_filename': file_name, 'channel': 'Website (Public)'})
 
             if 'priority' in values and setting_allow_website_priority_set == "everyone":
-                new_ticket_id.priority_id = int(values['priority'])
-                            
+                new_ticket_id.priority = int(values['priority'])
+
         if "subcategory" in values:
             #Also get the data from the extra fields
             for extra_field in request.env['website.support.ticket.subcategory.field'].sudo().search([('wsts_id','=', int(sub_category) )]):
@@ -409,54 +413,84 @@ class SupportTicketController(http.Controller):
 
         return werkzeug.utils.redirect("/support/ticket/thanks")
 
-
     @http.route('/support/ticket/thanks', type="http", auth="public", website=True)
     def support_ticket_thanks(self, **kw):
         """Displays a thank you page after the user submits a ticket"""
         return http.request.render('website_support.support_thank_you', {})
 
-    @http.route('/support/ticket/view', type="http", auth="user", website=True)
-    def support_ticket_view_list(self, **kw):
-        """Displays a list of support tickets owned by the logged in user"""
+    # @http.route('/support/ticket/view', type="http", auth="user", website=True)
+    # def support_ticket_view_list(self, **kw):
+    #     """Displays a list of support tickets owned by the logged in user"""
+    #
+    #     values = {}
+    #     for field_name, field_value in kw.items():
+    #         values[field_name] = field_value
+    #
+    #     extra_access = []
+    #     for extra_permission in http.request.env.user.partner_id.stp_ids:
+    #         extra_access.append(extra_permission.id)
+    #
+    #     if 'stage' in values:
+    #         support_tickets = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False), ('stage', '=', int(values['stage'])) ])
+    #     else:
+    #         support_tickets = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False) ])
+    #
+    #     no_approval_required = request.env['ir.model.data'].get_object('website_support','no_approval_required')
+    #     change_requests = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False), ('approval_id','!=',no_approval_required.id) ], order="planned_time desc")
+    #
+    #     ticket_stage = http.request.env['website.support.ticket.stage'].sudo().search([])
+    #
+    #     return http.request.render('website_support.support_ticket_view_list', {'support_tickets':support_tickets,'ticket_count':len(support_tickets), 'change_requests': change_requests, 'request_count': len(change_requests), 'ticket_stage': ticket_stage})
 
-        values = {}
-        for field_name, field_value in kw.items():
-            values[field_name] = field_value
-            
-        extra_access = []
-        for extra_permission in http.request.env.user.partner_id.stp_ids:
-            extra_access.append(extra_permission.id)
+    # @http.route('/support/ticket/view/<ticket>', type="http", auth="user", website=True)
+    # def support_ticket_view(self, ticket):
+    #     """View an individual support ticket"""
+    #
+    #     extra_access = []
+    #     for extra_permission in http.request.env.user.partner_id.stp_ids:
+    #         extra_access.append(extra_permission.id)
+    #
+    #     #only let the user this ticket is assigned to view this ticket
+    #     support_ticket = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('id','=',ticket) ])[0]
+    #     return http.request.render('website_support.support_ticket_view', {'support_ticket':support_ticket})
 
-        if 'state' in values:
-            support_tickets = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False), ('state', '=', int(values['state'])) ])
+    @http.route("/support/ticket/<int:ticket_id>/<token>", type='http', auth="public", website=True)
+    def view(self, ticket_id, pdf=None, anexo=None, token=None, message=False, **post):
+        # use sudo to allow accessing/viewing orders for public user
+        # only if he knows the private token
+        if token:
+            Ticket = request.env['website.support.ticket'].sudo().search([('id', '=', ticket_id), ('access_token', '=', token)])
         else:
-            support_tickets = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False) ])
+            Ticket = request.env['website.support.ticket'].search([('id', '=', ticket_id)])
+        if not Ticket:
+            return request.render('website.404')
+        # Token or not, sudo the order, since portal user has not access on
+        # taxes, required to compute the total_amout of SO.
+        ticket_sudo = Ticket.sudo()
+        if token:
+            values = {
+                'ticket': ticket_sudo,
+                'access_token': token
+            }
+        else:
+            values = {
+                'ticket': ticket_sudo,
+            }
+        # if token:
+            # return request.render('website_support.support_ticket_view', values)
+        # else:
+        #     values = {
+        #         'ticket': ticket_sudo,
+        #     }
+        return request.render('website_support.portal_ticket_page', values)
 
-        no_approval_required = request.env['ir.model.data'].get_object('website_support','no_approval_required')
-        change_requests = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('partner_id','!=',False), ('approval_id','!=',no_approval_required.id) ], order="planned_time desc")
 
-        ticket_states = http.request.env['website.support.ticket.states'].sudo().search([])
-
-        return http.request.render('website_support.support_ticket_view_list', {'support_tickets':support_tickets,'ticket_count':len(support_tickets), 'change_requests': change_requests, 'request_count': len(change_requests), 'ticket_states': ticket_states})
-
-    @http.route('/support/ticket/view/<ticket>', type="http", auth="user", website=True)
-    def support_ticket_view(self, ticket):
-        """View an individual support ticket"""
-
-        extra_access = []
-        for extra_permission in http.request.env.user.partner_id.stp_ids:
-            extra_access.append(extra_permission.id)
-
-        #only let the user this ticket is assigned to view this ticket
-        support_ticket = http.request.env['website.support.ticket'].sudo().search(['|', ('partner_id','=',http.request.env.user.partner_id.id), ('partner_id', 'in', extra_access), ('id','=',ticket) ])[0]
-        return http.request.render('website_support.support_ticket_view', {'support_ticket':support_ticket})
-
-    @http.route('/support/portal/ticket/view/<portal_access_key>', type="http", auth="public", website=True)
-    def support_portal_ticket_view(self, portal_access_key):
-        """View an individual support ticket (portal access)"""
-
-        support_ticket = http.request.env['website.support.ticket'].sudo().search([('portal_access_key','=',portal_access_key) ])[0]
-        return http.request.render('website_support.support_ticket_view', {'support_ticket':support_ticket, 'portal_access_key': portal_access_key})
+    # @http.route('/support/portal/ticket/view/<access_token>', type="http", auth="public", website=True)
+    # def support_portal_ticket_view(self, access_token):
+    #     """View an individual support ticket (portal access)"""
+    #
+    #     support_ticket = http.request.env['website.support.ticket'].sudo().search([('access_token','=',access_token) ])[0]
+    #     return http.request.render('website_support.support_ticket_view', {'support_ticket':support_ticket, 'access_token': access_token})
 
     @http.route('/support/portal/ticket/comment', type="http", auth="public", website=True)
     def support_portal_ticket_comment(self, **kw):
@@ -466,39 +500,39 @@ class SupportTicketController(http.Controller):
         for field_name, field_value in kw.items():
             values[field_name] = field_value
 
-        support_ticket = http.request.env['website.support.ticket'].sudo().search([('portal_access_key','=', values['portal_access_key'] ) ])[0]
+        support_ticket = http.request.env['website.support.ticket'].sudo().search([('access_token','=', values['access_token'] ) ])[0]
 
         http.request.env['website.support.ticket.message'].sudo().create({'ticket_id':support_ticket.id, 'by': 'customer','content':values['comment']})
 
-        support_ticket.state = request.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_state_customer_replied')
+        support_ticket.stage = request.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_stage_customer_replied')
 
         request.env['website.support.ticket'].sudo().browse(support_ticket.id).message_post(body=values['comment'], subject="Support Ticket Reply", message_type="comment")
 
-        return werkzeug.utils.redirect("/support/portal/ticket/view/" + str(support_ticket.portal_access_key) )
+        return werkzeug.utils.redirect("/support/ticket/"+str(support_ticket.id)+"/"+ str(support_ticket.access_token) )
 
-    @http.route('/support/ticket/comment',type="http", auth="user")
-    def support_ticket_comment(self, **kw):
-        """Adds a comment to the support ticket"""
-
-        values = {}
-        for field_name, field_value in kw.items():
-            values[field_name] = field_value
-
-        ticket = http.request.env['website.support.ticket'].sudo().search([('id','=',values['ticket_id'])])
-
-        #check if this user owns this ticket
-        if ticket.partner_id.id == http.request.env.user.partner_id.id or ticket.partner_id in http.request.env.user.partner_id.stp_ids:
-
-            http.request.env['website.support.ticket.message'].sudo().create({'ticket_id':ticket.id, 'by': 'customer','content':values['comment']})
-
-            ticket.state = request.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_state_customer_replied')
-
-            request.env['website.support.ticket'].sudo().browse(ticket.id).message_post(body=values['comment'], subject="Support Ticket Reply", message_type="comment")
-
-        else:
-            return "You do not have permission to submit this commment"
-
-        return werkzeug.utils.redirect("/support/ticket/view/" + str(ticket.id))
+    # @http.route('/support/ticket/comment',type="http", auth="user")
+    # def support_ticket_comment(self, **kw):
+    #     """Adds a comment to the support ticket"""
+    #
+    #     values = {}
+    #     for field_name, field_value in kw.items():
+    #         values[field_name] = field_value
+    #
+    #     ticket = http.request.env['website.support.ticket'].sudo().search([('id','=',values['ticket_id'])])
+    #
+    #     #check if this user owns this ticket
+    #     if ticket.partner_id.id == http.request.env.user.partner_id.id or ticket.partner_id in http.request.env.user.partner_id.stp_ids:
+    #
+    #         http.request.env['website.support.ticket.message'].sudo().create({'ticket_id':ticket.id, 'by': 'customer','content':values['comment']})
+    #
+    #         ticket.stage = request.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_stage_customer_replied')
+    #
+    #         request.env['website.support.ticket'].sudo().browse(ticket.id).message_post(body=values['comment'], subject="Support Ticket Reply", message_type="comment")
+    #
+    #     else:
+    #         return "You do not have permission to submit this commment"
+    #
+    #     return werkzeug.utils.redirect("/my/tickets/" + str(ticket.id))
 
     @http.route('/support/ticket/close',type="http", auth="user")
     def support_ticket_close(self, **kw):
@@ -513,8 +547,8 @@ class SupportTicketController(http.Controller):
         #check if this user owns this ticket
         if ticket.partner_id.id == http.request.env.user.partner_id.id or ticket.partner_id in http.request.env.user.partner_id.stp_ids:
 
-            customer_closed_state = request.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_state_customer_closed')
-            ticket.state = customer_closed_state
+            customer_closed_stage = request.env['ir.model.data'].sudo().get_object('website_support', 'website_ticket_stage_customer_closed')
+            ticket.stage = customer_closed_stage
 
             ticket.close_time = datetime.datetime.now()
             ticket.close_date = datetime.date.today()
@@ -524,15 +558,15 @@ class SupportTicketController(http.Controller):
 
             ticket.sla_active = False
 
-            closed_state_mail_template = customer_closed_state.mail_template_id
+            closed_stage_mail_template = customer_closed_stage.mail_template_id
 
-            if closed_state_mail_template:
-                closed_state_mail_template.send_mail(ticket.id, True)
+            if closed_stage_mail_template:
+                closed_stage_mail_template.send_mail(ticket.id, True)
 
         else:
             return "You do not have permission to close this commment"
 
-        return werkzeug.utils.redirect("/support/ticket/view/" + str(ticket.id))
+        return werkzeug.utils.redirect("/my/tickets/" + str(ticket.id))
 
     @http.route('/support/help/auto-complete',auth="public", website=True, type='http')
     def support_help_autocomplete(self, **kw):
@@ -550,6 +584,6 @@ class SupportTicketController(http.Controller):
         for help_page in help_pages:
             #return_item = {"label": help_page.name + "<br/><sub>" + help_page.group_id.name + "</sub>","value": help_page.url_generated}
             return_item = {"label": help_page.name,"value": help_page.url_generated}
-            my_return.append(return_item) 
+            my_return.append(return_item)
 
         return json.JSONEncoder().encode(my_return)

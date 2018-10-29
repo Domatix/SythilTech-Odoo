@@ -1,10 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-    
-    <record id="website_support_settings_view_form" model="ir.ui.view">
-        <field name="name">website.support.settings form view</field>
-        <field name="model">website.support.settings</field>
+
+      <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.website.support</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="15"/>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('settings')]" position="inside">
+                    <div class="app_settings_block" data-string="Website Support" string="Website Support" data-key="website_support" groups="website_support.support_manager">
+                      <h2>Website support</h2>
+                      <div class="row mt16 o_settings_container">
+                          <div class="col-xs-12 col-md-6 o_setting_box">
+                              <div class="o_setting_left_pane">
+                                <field name="allow_user_signup"/>
+                              </div>
+                              <div class="o_setting_right_pane">
+                                <label for="allow_user_signup"/>
+                                <div class="text-muted">
+                                    Allow user signup in website to create support tickets
+                                </div>
+                              </div>
+                          </div>
+                          <div class="col-xs-12 col-md-6 o_setting_box">
+                              <div class="o_setting_left_pane"/>
+                              <div class="o_setting_right_pane">
+                                  <label for="allow_website_priority_set"/>
+                                  <div class="content-group">
+                                      <div class="mt16">
+                                          <field name="allow_website_priority_set" />
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+
+                        </div>
+                        <h2>Ticket Attachment</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-xs-12 col-md-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                  <label for="max_ticket_attachments"/>
+                                  <div class="text-muted">
+                                      Number of attachments allowed in support tickets
+                                  </div>
+                                  <div class="content-group">
+                                      <div class="mt16">
+
+                                          <field name="max_ticket_attachments"/>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <label for="max_ticket_attachment_filesize"/>
+                                    <div class="text-muted">
+                                        Maximum size allowed for attachments
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="max_ticket_attachment_filesize" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      <h2>Email</h2>
+                      <div class="row mt16 o_settings_container">
+                          <div class="col-xs-12 col-md-6 o_setting_box">
+                              <div class="o_setting_left_pane"/>
+                              <div class="o_setting_right_pane">
+                                <label string="Change User Email Template"/>
+                                <div class="text-muted">
+                                    Email template for user change in support ticket
+                                </div>
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label string="Template" class="col-md-3 o_light_label"/>
+                                        <field name="change_user_email_template_id"/>
+                                    </div>
+                                </div>
+                              </div>
+                          </div>
+                          <div class="col-xs-12 col-md-6 o_setting_box">
+                              <div class="o_setting_left_pane"/>
+                              <div class="o_setting_right_pane">
+                                  <label for="email_default_category_id"/>
+                                  <div class="text-muted">
+                                      Default category for tickets created by email
+                                  </div>
+                                  <div class="content-group">
+                                      <div class="row mt16">
+                                          <label string="Category" class="col-md-3 o_light_label"/>
+                                          <field name="email_default_category_id" />
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col-xs-12 col-md-6 o_setting_box">
+                              <div class="o_setting_left_pane"/>
+                              <div class="o_setting_right_pane">
+                                <label for="staff_reply_email_template_id"/>
+                                <div class="text-muted">
+                                    Email template for staff reply to support ticket
+                                </div>
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label string="Template" class="col-md-3 o_light_label"/>
+                                        <field name="staff_reply_email_template_id"/>
+                                    </div>
+                                </div>
+                              </div>
+                          </div>
+
+                        </div>
+
+                        <h2>SLA</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-xs-12 col-md-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                  <field name="sla_active"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                  <label for="sla_active"/>
+                                  <div class="text-muted">
+                                      Active SLA
+                                  </div>
+                                  <div class="content-group" attrs="{'invisible': [('sla_active' ,'=', False)]}">
+                                      <div class="mt16">
+                                          <label for="business_hours_id"/>
+                                          <field name="business_hours_id"/>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <h2>Survey</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-xs-12 col-md-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                  <field name="auto_send_survey"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                  <label for="auto_send_survey"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Google reCAPTCHA</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-xs-12 col-md-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                  <field name="google_recaptcha_active"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                  <label for="google_recaptcha_active"/>
+                                  <div class="text-muted">
+                                      Active Google reCAPTCHA for ticket creation
+                                  </div>
+                                  <div class="content-group" attrs="{'invisible': [('google_recaptcha_active' ,'=', False)]}">
+                                      <div class="mt16">
+                                          <label for="google_captcha_client_key"/>
+                                          <field name="google_captcha_client_key"/>
+                                      </div>
+                                      <div class="mt16">
+                                          <label for="google_captcha_secret_key"/>
+                                          <field name="google_captcha_secret_key"/>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+
+
+
+                          </div>
+
+                    </div>
+              </xpath>
+            </field>
+      </record>
+    <!-- <record id="website_support_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings form view</field>
+        <field name="model">res.config.settings</field>
         <field name="arch" type="xml">
             <form class="oe_form_configuration">
                 <header>
@@ -27,14 +208,15 @@
                 </group>
       	    </form>
         </field>
-    </record>
-
+    </record> -->
     <record id="website_support_settings_action" model="ir.actions.act_window">
-        <field name="name">Support Ticket Settings</field>
-	<field name="res_model">website.support.settings</field>
-	<field name="view_mode">form</field>
-	<field name="target">inline</field>
-    </record>
+            <field name="name">Settings</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+            <field name="context">{'module' : 'website_support'}</field>
+        </record>
 
     </data>
 </odoo>

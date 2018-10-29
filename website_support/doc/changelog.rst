@@ -60,9 +60,9 @@ v1.2.13
 
 v1.2.12
 =======
-* Website filter state for tickets
+* Website filter stage for tickets
 * Hide SLA resume and pause buttons if no SLA is assigned to the ticket
-* Choose which states get classified as unattended
+* Choose which stage get classified as unattended
 
 v1.2.11
 =======
@@ -144,7 +144,7 @@ v1.0.9
 v1.0.8
 ======
 * Fix subcategory change not disappearing
-* States no longer readonly
+* stage no longer readonly
 * Move Kanban view over from Odoo 10
 
 v1.0.7

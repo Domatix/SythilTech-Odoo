@@ -3,8 +3,8 @@
   <data>
 
       <record id="website_support_settings_view_form_inherit_timesheets" model="ir.ui.view">
-          <field name="name">website.support.settings timesheet inherit</field>
-          <field name="model">website.support.settings</field>
+          <field name="name">res.config.settings timesheet inherit</field>
+          <field name="model">res.config.settings</field>
           <field name="inherit_id" ref="website_support.website_support_settings_view_form"/>
           <field name="arch" type="xml">
               <field name="email_default_category_id" position="after">

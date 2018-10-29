@@ -15,6 +15,7 @@
                         <button type="object" name="resume_sla" string="Resume SLA" attrs="{'invisible' :['|', ('sla_active', '!=', False ), ('sla_id','==', False)]}"/>
                         <button type="object" name="send_survey" string="Send Survey"/>
                         <button type="object" name="request_approval" string="Request Approval"/>
+                        <field name="stage" widget="statusbar" clickable="True" options="{'fold_field': 'fold'}"/>
                     </header>
                     <sheet>
                         <div class="oe_title">
@@ -25,11 +26,10 @@
                             <group>
                                 <field name="ticket_number"/>
                                 <field name="channel"/>
-                                <field name="priority_id"/>
-                                <field name="tag_ids" widget="many2many_tags"/>
+                                <field name="priority" widget="priority"/>
+                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" />
                                 <field name="category"/>
                                 <field name="sub_category_id" domain="[('parent_category_id','=',category)]"/>
-                                <field name="state"/>
                             </group>
                             <group>
                                 <field name="user_id" domain="[('share','=',False)]"/>
@@ -77,8 +77,8 @@
                         </notebook>
                     </sheet>
                     <div class="oe_chatter">
-                        <!-- TODO Disable the new message button because they are meant to use reply -->
                         <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
                         <field name="message_ids" widget="mail_thread"/>
                     </div>
                 </form>
@@ -89,27 +89,76 @@
             <field name="name">website.support.ticket.kanban.view</field>
             <field name="model">website.support.ticket</field>
             <field name="arch" type="xml">
-                <kanban class="o_res_partner_kanban" default_group_by="state" create="false">
+                <kanban default_group_by="stage" create="false">
                     <field name="subject"/>
-                    <field name="priority_id"/>
-                    <field name="state"/>
+                    <field name="priority"/>
                     <field name="category"/>
-                    <field name="description"/>
+                    <field name="tag_ids"/>
+                    <field name="user_id"/>
+                    <field name="color"/>
+                    <!-- <field name="displayed_image_id"/> -->
+                    <field name="activity_ids"/>
+                    <field name="message_needaction_counter"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div class="oe_kanban_global_click o_res_partner_kanban">
+                          <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title"><field name="subject"/></strong><br/>
+                                        <small class="o_kanban_record_subtitle text-muted">
+                                            <t t-if="record.category.raw_value"><span><field name="category"/></span></t>
+                                            <!-- <t t-if="record.email.raw_value"><span><field name="email"/></span></t> -->
+                                        </small>
+                                    </div>
+                                    <div class="o_dropdown_kanban dropdown" groups="base.group_user">
+                                        <a class="dropdown-toggle btn" data-toggle="dropdown" href="#">
+                                            <span class="fa fa-ellipsis-v" aria-hidden="true"/>
+                                        </a>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                            <!-- <li t-if="widget.editable"><a type="set_cover">Set Cover Image</a></li> -->
+                                            <li t-if="widget.editable"><a type="edit">Edit Task</a></li>
+                                            <li t-if="widget.deletable"><a type="delete">Delete</a></li>
+                                            <li class="divider"/>
+                                            <!-- <li class="dropdown-header">Record's Colour</li> -->
+                                            <li>
+                                                <ul class="oe_kanban_colorpicker" data-field="color"/>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- <div class="o_kanban_record_body">
+                                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                    <div t-if="record.displayed_image_id.value">
+                                        <field name="displayed_image_id" widget="attachment_image"/>
+                                    </div>
+                                </div> -->
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="priority" widget="priority"/>
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                        <t t-if="record.message_needaction_counter.raw_value">
+                                            <span class="oe_kanban_mail_new" title="Unread Messages"><i class="fa fa-comments"/><t t-raw="record.message_needaction_counter.raw_value"/></span>
+                                        </t>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <img t-att-src="kanban_image('res.users', 'image_small', record.user_id.raw_value)" t-att-title="record.user_id.value" width="24" height="24" class="oe_kanban_avatar"/>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <!-- <div class="o_kanban_record_top">
                                 <div class="o_kanban_tags_section oe_kanban_partner_categories"/>
                                 <div class="oe_kanban_details">
                                     <strong class="oe_partner_heading"><field name="subject"/></strong>
                                     <ul>
-                                        <li t-if="record.priority_id.raw_value"><field name="priority_id"/></li>
-                                        <li t-if="record.state.raw_value"><field name="state"/></li>
                                         <li t-if="record.category.raw_value"><field name="category"/></li>
-                                        <li t-if="record.description.raw_value"><t t-raw="record.description.raw_value"/></li>
+                                        <li t-if="record.tag_ids.raw_value"><field name="tag_ids"/></li>
+                                        <li t-if="record.priority.raw_value"><field name="priority" widget="priority"/></li>
                                     </ul>
                                     <div class="oe_kanban_partner_links"/>
                                 </div>
-                            </div>
+                            </div> -->
                         </t>
                     </templates>
                 </kanban>
@@ -146,16 +195,15 @@
             <field name="name">website.support.ticket tree view</field>
             <field name="model">website.support.ticket</field>
             <field name="arch" type="xml">
-                <tree colors="black:ticket_color==False">
+                <tree >
                     <field name="create_user_id" invisible="True"/>
-                    <field name="ticket_color" invisible="True"/>
                     <field name="create_date"/>
                     <field name="ticket_number"/>
-                    <field name="priority_id"/>
+                    <field name="priority" widget="priority"/>
                     <field name="parent_company_id"/>
                     <field name="person_name"/>
                     <field name="category"/>
-                    <field name="state"/>
+                    <field name="stage"/>
                     <field name="subject"/>
                     <field name="sla_active"/>
                     <field name="sla_timer" widget="float_time"/>
@@ -166,7 +214,7 @@
         <record id="website_support_ticket_action_partner" model="ir.actions.act_window">
             <field name="name">Support Tickets</field>
             <field name="res_model">website.support.ticket</field>
-            <field name="view_mode">tree,kanban,form,graph</field>
+            <field name="view_mode">kanban,tree,form,graph</field>
             <field name="help" type="html">
                 <p>
                     No Support Tickets found
@@ -177,7 +225,7 @@
         <record id="website_support_ticket_action" model="ir.actions.act_window">
             <field name="name">Support Tickets</field>
             <field name="res_model">website.support.ticket</field>
-            <field name="view_mode">tree,kanban,form,graph</field>
+            <field name="view_mode">kanban,tree,form,graph</field>
             <field name="context">{"search_default_unattended_tickets":1, 'auto_refresh': 1, 'default_create_user_id': uid}</field>
             <field name="help" type="html">
                 <p>

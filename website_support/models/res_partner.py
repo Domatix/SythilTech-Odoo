@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 class ResPartnerTicket(models.Model):
 
@@ -22,8 +22,8 @@ class ResPartnerTicket(models.Model):
     @api.depends('support_ticket_ids')
     def _count_new_support_tickets(self):
         """Sets the amount of new support tickets owned by this customer"""
-        opened_state = self.env['ir.model.data'].get_object('website_support', 'website_ticket_state_open')
-        self.new_support_ticket_count = self.support_ticket_ids.search_count([('partner_id','=',self.id), ('state','=',opened_state.id)])
+        opened_stage = self.env['ir.model.data'].get_object('website_support', 'website_ticket_stage_open')
+        self.new_support_ticket_count = self.support_ticket_ids.search_count([('partner_id','=',self.id), ('stage','=',opened_stage.id)])
 
     @api.one
     @api.depends('support_ticket_count', 'new_support_ticket_count')

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>                    
+<odoo>
+    <data>
 
         <record id="support_ticket_survey" model="mail.template">
             <field name="name">Support Ticket Survey</field>
@@ -18,7 +18,7 @@
                 <p><a href="_survey_url_">here</a></p>
                 <hr/>
                 <b>Ticket Number:</b> ${object.ticket_number or object.id}<br/>
-                <b>Ticket Category:</b> 
+                <b>Ticket Category:</b>
                 % if object.category.name :
                     ${object.category.name}
                 % endif
@@ -51,7 +51,7 @@
             ]]>
             </field>
         </record>
-        
+
         <record id="new_support_ticket_category" model="mail.template">
             <field name="name">Support Ticket New Ticket (Category)</field>
             <field name="model_id" ref="model_website_support_ticket"></field>
@@ -74,7 +74,7 @@
         <record id="support_ticket_user_change" model="mail.template">
             <field name="name">Support Ticket User Change</field>
             <field name="model_id" ref="model_website_support_ticket"></field>
-            <field name="email_from"><![CDATA[${object.company_id.name} <${object.company_id.email}>]]></field>            
+            <field name="email_from"><![CDATA[${object.company_id.name} <${object.company_id.email}>]]></field>
             <field name="subject">A Support Ticket has been assigned to you</field>
             <field name="auto_delete" eval="False"/>
             <field name="built_in" eval="True"/>
@@ -83,14 +83,14 @@
                 <p>A support ticket has been assigned to you here are the details</p>
                 <hr/>
                 <b>Ticket Number:</b> ${object.ticket_number or object.id}<br/>
-                <b>Ticket Category:</b> 
+                <b>Ticket Category:</b>
                 % if object.category.name :
                     ${object.category.name}
                 % endif
                 <br/>
                 <b>Ticket Description:</b><br/>
                 ${object.description|safe}
-                
+
             ]]>
             </field>
         </record>
@@ -98,7 +98,7 @@
         <record id="new_support_ticket_category_change" model="mail.template">
             <field name="name">Support Ticket Category Change</field>
             <field name="model_id" ref="model_website_support_ticket"></field>
-            <field name="email_from"><![CDATA[${object.company_id.name} <${object.company_id.email}>]]></field>            
+            <field name="email_from"><![CDATA[${object.company_id.name} <${object.company_id.email}>]]></field>
             <field name="email_to">${object.email|safe}</field>
             <field name="subject">Your support ticket has been updated</field>
             <field name="auto_delete" eval="False"/>
@@ -108,14 +108,14 @@
                 <p>Your support ticket has been updated and is now in the category '${object.category.name}' </p>
                 <hr/>
                 <b>Ticket Number:</b> ${object.ticket_number or object.id}<br/>
-                <b>Ticket Category:</b> 
+                <b>Ticket Category:</b>
                 % if object.category.name :
                     ${object.category.name}
                 % endif
                 <br/>
                 <b>Ticket Description:</b><br/>
                 ${object.description|safe}
-                
+
             ]]>
             </field>
         </record>
@@ -134,14 +134,14 @@
                 <p>${object.close_comment or ''}</p>
                 <hr/>
                 <b>Ticket Number:</b> ${object.ticket_number or object.id}<br/>
-                <b>Ticket Category:</b> 
+                <b>Ticket Category:</b>
                 % if object.category.name :
                     ${object.category.name}
                 % endif
                 <br/>
                 <b>Ticket Description:</b><br/>
                 ${object.description|safe}
-                
+
             ]]>
             </field>
         </record>
@@ -160,16 +160,16 @@
                 % endif
                 <p>Thank you for submitting a support ticket to us, we will get back to your shortly</p>
                 <hr/>
-                <b>View Ticket Online:</b> <a href="/support/portal/ticket/view/${object.portal_access_key}">here</a><br/>
+                <b>View Ticket Online:</b> <a href="/support/ticket/${object.id}/${object.access_token}">here</a><br/>
                 <b>Ticket Number:</b> ${object.ticket_number or object.id}<br/>
-                <b>Ticket Category:</b> 
+                <b>Ticket Category:</b>
                 % if object.category.name :
                     ${object.category.name}
                 % endif
                 <br/>
                 <b>Ticket Description:</b><br/>
                 ${object.description|safe}
-                
+
             ]]>
             </field>
         </record>
@@ -178,15 +178,15 @@
             <field name="name">Support Ticket Reply Wrapper</field>
             <field name="model_id" ref="model_website_support_ticket_compose"></field>
             <field name="subject">${object.subject}</field>
-            <field name="email_from">${user.email|safe}</field>            
+            <field name="email_from">${user.email|safe}</field>
             <field name="email_to">${object.email|safe}</field>
             <field name="auto_delete" eval="False"/>
             <field name="built_in" eval="True"/>
             <field name="body_html"><![CDATA[
                 ${object.body|safe}
                 <hr/>
-                % if object.ticket_id.portal_access_key :
-                    <b>View Ticket Online:</b> <a href="/support/portal/ticket/view/${object.ticket_id.portal_access_key}">here</a><br/>
+                % if object.ticket_id.access_token :
+                    <b>View Ticket Online:</b> <a href="/support/ticket/${object.id}/${object.access_token}">here</a><br/>
                 % endif
                 <b>Ticket Number:</b> ${object.ticket_id.ticket_number or object.ticket_id.id}<br/>
                 <b>Ticket Category:</b> ${object.ticket_id.category.name or ''}<br/>
@@ -241,6 +241,6 @@
             ]]>
             </field>
         </record>
-        
+
     </data>
-</openerp>
+</odoo>
