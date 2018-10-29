@@ -89,7 +89,7 @@
             <field name="name">website.support.ticket.kanban.view</field>
             <field name="model">website.support.ticket</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="stage" create="false" class="o_kanban_small_column">
+                <kanban default_group_by="stage"  class="o_kanban_small_column">
                     <field name="subject"/>
                     <field name="priority"/>
                     <field name="category"/>
