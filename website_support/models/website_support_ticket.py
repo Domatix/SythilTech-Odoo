@@ -53,6 +53,7 @@ class WebsiteSupportTicket(models.Model):
 
     def _default_approval_id(self):
         return self.env['ir.model.data'].get_object('website_support', 'no_approval_required')
+
     def _get_default_access_token(self):
         return str(uuid.uuid4())
 
@@ -110,9 +111,18 @@ class WebsiteSupportTicket(models.Model):
     sla_timer = fields.Float(string="SLA Time Remaining")
     sla_timer_format = fields.Char(string="SLA Timer Format", compute="_compute_sla_timer_format")
     sla_active = fields.Boolean(string="SLA Active")
+    sla_settings_active = fields.Boolean(
+        compute="_compute_sla_settings",
+        string='SLA Active')
+
     sla_response_category_id = fields.Many2one('website.support.sla.response', string="SLA Response Category")
     sla_alert_ids = fields.Many2many('website.support.sla.alert', string="SLA Alerts",
                                      help="Keep record of SLA alerts sent so we do not resend them")
+
+    @api.multi
+    def _compute_sla_settings(self):
+        for record in self:
+            record.sla_settings_active = record.env['ir.default'].get('res.config.settings', 'sla_active')
 
     @api.one
     @api.depends('sla_timer')

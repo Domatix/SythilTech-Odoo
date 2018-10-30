@@ -47,13 +47,13 @@ class CustomerPortal(CustomerPortal):
         searchbar_sortings = {
             'date': {'label': _('Newest'), 'order': 'create_date desc'},
             'subject': {'label': _('Subject'), 'order': 'subject'},
-            'state': {'label': _('State'), 'order': 'state'},
-            'update': {'label': _('Last State Update'), 'order': 'date_last_stage_update desc'},
+            'stage': {'label': _('Stage'), 'order': 'stage'},
+            'update': {'label': _('Last Stage Update'), 'order': 'date_last_stage_update desc'},
         }
         searchbar_filters = {'all': {'label': _('All'), 'domain': []}}
-        for state in request.env['website.support.ticket.stage'].search([]):
+        for stage in request.env['website.support.ticket.stage'].search([]):
             searchbar_filters.update({
-                str(state.id): {'label': state.name, 'domain': [('state', '=', state.id)]}
+                str(stage.id): {'label': stage.name, 'domain': [('stage', '=', stage.id)]}
             })
 
         # default sort by order

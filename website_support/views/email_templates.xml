@@ -213,9 +213,9 @@
                     <br/>
                 % endif
 
-                <p>Approval is required before we can proceed with this support request, please click the link below to accept</p>
+                <p>Approval is required before we can proceed with this support request, please click the botton below to accept</p>
                 <br/>
-                <p><a href="${object.approve_url}" style="color:green">Approve</a> | <a href="${object.disapprove_url}" style="color:red">Don't Approve</a></p>
+                <p><a class="btn btn-success" style="color:white" href="${object.approve_url}"> <i class="fa fa-check"></i>Approve</a> | <a class="btn btn-danger" style="color:white" href="${object.disapprove_url}" > <i class="fa fa-times"></i>Reject</a></p>
 
             ]]>
             </field>

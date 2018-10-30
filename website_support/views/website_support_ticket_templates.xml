@@ -27,9 +27,18 @@
                   <span class="caret"></span>
           </a>
           <ul class="dropdown-menu js_usermenu" role="menu">
-              <li id="o_help_pages"><a t-attf-href="/support/help" role="menuitem">Help Pages</a></li>
+              <t t-if="request.env.user.partner_id.name == 'Public user'">
+                  <t t-if="request.env['ir.default'].get('res.config.settings', 'allow_user_signup')">
+                      <li id="o_signup"><a href="/support/account/create">Create Account</a></li>
+                  </t>
+              </t>
+              <t t-if="request.env['ir.default'].get('res.config.settings', 'ghp_active')">
+                <li id="o_help_pages"><a t-attf-href="/support/help" role="menuitem">Help Pages</a></li>
+              </t>
               <li id="o_submit_ticket"><a t-attf-href="/support/ticket/submit" role="menuitem">Submit a Ticket</a></li>
-              <li id="o_submit_ticket"><a t-attf-href="/my/tickets" role="menuitem">My Tickets</a></li>
+              <t t-if="request.env.user.partner_id.name != 'Public user'">
+                <li id="o_submit_ticket"><a t-attf-href="/my/tickets" role="menuitem">My Tickets</a></li>
+              </t>
           </ul>
         </li>
       </xpath>
@@ -676,9 +685,9 @@
                     <th>By</th>
                     <th>Subject</th>
                     <th>Category</th>
-                    <th>State</th>
+                    <th>Stage</th>
                     <th>Create Date</th>
-                    <th>Last State Update</th>
+                    <th>Last Stage Update</th>
                     <th>Close Date</th>
                   </tr>
                 </thead>
@@ -731,7 +740,7 @@
                           </div>
                           <form method="GET" t-if="not ticket.close_time" t-attf-action="/support/ticket/close" style="display:inline;">
                             <input type="hidden" name="ticket_id" t-attf-value="#{ticket.id}"/>
-                            <button class="btn btn-primary btn-lg pull-right">Close</button>
+                            <button class="btn btn-success pull-right" style="margin-right:15px;margin-top:3px;">Close</button>
                         </form>
                         </div>
                   </div>
@@ -742,10 +751,10 @@
                         <div class="pull-left">
                           <strong>Date:</strong> <span t-field="ticket.create_date" /><br/>
                           <b>Category:</b> <t t-esc="ticket.category.name"/><br/>
-                          <b>State:</b> <t t-esc="ticket.stage.name"/><br/>
+                          <b>Stage:</b> <t t-esc="ticket.stage.name"/><br/>
                         </div>
                         <div class="pull-right">
-                          <strong>Last State Update:</strong> <span t-field="ticket.create_date" /><br/>
+                          <strong>Last Stage Update:</strong> <span t-field="ticket.create_date" /><br/>
                         </div>
                       </div>
                       <br/>
