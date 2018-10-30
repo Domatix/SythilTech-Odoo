@@ -754,7 +754,7 @@
                           <b>Stage:</b> <t t-esc="ticket.stage.name"/><br/>
                         </div>
                         <div class="pull-right">
-                          <strong>Last Stage Update:</strong> <span t-field="ticket.create_date" /><br/>
+                          <strong>Last Stage Update:</strong> <span t-field="ticket.date_last_stage_update" /><br/>
                         </div>
                       </div>
                       <br/>

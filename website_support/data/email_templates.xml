@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+    <data noupdate="1">
 
         <record id="support_ticket_survey" model="mail.template">
             <field name="name">Support Ticket Survey</field>
@@ -185,9 +185,7 @@
             <field name="body_html"><![CDATA[
                 ${object.body|safe}
                 <hr/>
-                % if object.ticket_id.access_token :
-                    <b>View Ticket Online:</b> <a href="/support/ticket/${object.id}/${object.access_token}">here</a><br/>
-                % endif
+                <b>View Ticket Online:</b> <a href="/support/ticket/${object.ticket_id.id}/${object.ticket_id.access_token}">here</a><br/>
                 <b>Ticket Number:</b> ${object.ticket_id.ticket_number or object.ticket_id.id}<br/>
                 <b>Ticket Category:</b> ${object.ticket_id.category.name or ''}<br/>
                 % if object.ticket_id.planned_time_format :
@@ -215,7 +213,10 @@
 
                 <p>Approval is required before we can proceed with this support request, please click the botton below to accept</p>
                 <br/>
-                <p><a class="btn btn-success" style="color:white" href="${object.approve_url}"> <i class="fa fa-check"></i>Approve</a> | <a class="btn btn-danger" style="color:white" href="${object.disapprove_url}" > <i class="fa fa-times"></i>Reject</a></p>
+                <p>
+                  <a style="background-color:rgb(92, 184, 92); padding:8px 14px; color:#fff; border-radius:5px; font-size:14px" href="${object.approve_url}">Approve</a>
+                  <a style="background-color:rgb(217, 83, 79); padding:8px 14px; color:#fff; border-radius:5px; font-size:14px" href="${object.disapprove_url}" >Reject</a>
+                </p>
 
             ]]>
             </field>

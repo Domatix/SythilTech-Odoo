@@ -14,7 +14,7 @@
                       <field name="subject"/>
                       <field name="planned_time" attrs="{'invisible':[('approval','=', False)], 'required': [('approval','=', True)]}"/>
                   </group>
-                  <field name="body" widget="html"/>
+                  <field name="body"/>
                   <group>
                       <field name="template_id" context="{'default_model':'website.support.ticket', 'default_body_html': body}"/>
                   </group>

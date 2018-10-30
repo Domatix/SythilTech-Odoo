@@ -380,13 +380,12 @@ class WebsiteSupportTicket(models.Model):
 
     @api.multi
     def write(self, values, context=None):
-
         update_rec = super(WebsiteSupportTicket, self).write(values)
         now = fields.Datetime.now()
         if 'stage' in values:
             if self.stage.mail_template_id:
                 self.stage.mail_template_id.send_mail(self.id, True)
-                self.date_last_stage_update = now
+            self.date_last_stage_update = now
 
         #Email user if category has changed
         if 'category' in values:
@@ -560,7 +559,7 @@ class WebsiteSupportTicketCompose(models.Model):
     partner_id = fields.Many2one('res.partner', string="Partner", readonly="True")
     email = fields.Char(string="Email", readonly="True")
     subject = fields.Char(string="Subject", readonly="True")
-    body = fields.Text(string="Message Body")
+    body = fields.Html(string="Message Body")
     template_id = fields.Many2one('mail.template', string="Mail Template", domain="[('model_id','=','website.support.ticket'), ('built_in','=',False)]")
     approval = fields.Boolean(string="Approval")
     planned_time = fields.Datetime(string="Planned Time")
@@ -600,10 +599,10 @@ class WebsiteSupportTicketCompose(models.Model):
         send_mail.send()
 
         #Add to the message history to keep the data clean from the rest HTML
-        self.env['website.support.ticket.message'].create({'ticket_id': self.ticket_id.id, 'by': 'staff', 'content':self.body.replace("<p>","").replace("</p>","")})
+        self.env['website.support.ticket.message'].create({'ticket_id': self.ticket_id.id, 'by': 'staff', 'content': self.body})
 
         #Post in message history
-        #self.ticket_id.message_post(body=self.body, subject=self.subject, message_type='comment', subtype='mt_comment')
+        # self.ticket_id.message_post(body=self.body, subject=self.subject, message_type='comment', subtype='mt_comment')
 
         if self.approval:
             #Also change the approval
