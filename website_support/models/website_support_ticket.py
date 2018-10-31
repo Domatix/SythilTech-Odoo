@@ -112,7 +112,7 @@ class WebsiteSupportTicket(models.Model):
     sla_timer_format = fields.Char(string="SLA Timer Format", compute="_compute_sla_timer_format")
     sla_active = fields.Boolean(string="SLA Active")
     sla_settings_active = fields.Boolean(
-        compute="_compute_sla_settings",
+        compute="_compute_sla_settings_active",
         string='SLA Active')
 
     sla_response_category_id = fields.Many2one('website.support.sla.response', string="SLA Response Category")
@@ -120,9 +120,9 @@ class WebsiteSupportTicket(models.Model):
                                      help="Keep record of SLA alerts sent so we do not resend them")
 
     @api.multi
-    def _compute_sla_settings(self):
+    def _compute_sla_settings_active(self):
         for record in self:
-            record.sla_settings_active = record.env['ir.default'].get('res.config.settings', 'sla_active')
+            record.sla_settings_active = record.env['ir.default'].get('res.config.settings', 'group_website_support_sla')
 
     @api.one
     @api.depends('sla_timer')

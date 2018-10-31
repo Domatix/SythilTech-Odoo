@@ -1,5 +1,6 @@
 from odoo import api, fields, models
 
+
 class ResConfigSettings(models.TransientModel):
 
     _inherit = 'res.config.settings'
@@ -18,8 +19,8 @@ class ResConfigSettings(models.TransientModel):
     google_captcha_secret_key = fields.Char(string="reCAPTCHA Secret Key")
     allow_website_priority_set = fields.Selection([("partner","Partner Only"), ("everyone","Everyone")], string="Allow Website Priority Set", help="Cusomters can set the priority of a ticket when submitting via the website form\nPartner Only = logged in user")
 
-    sla_active = fields.Boolean(string="SLA Active", group='base.group_portal,base.group_user,base.group_public', implied_group='website_support.group_website_support_sla')
-    ghp_active = fields.Boolean(string="Groups and help pages active", group='base.group_portal,base.group_user,base.group_public', implied_group='website_support.group_website_support_help_groups')
+    group_website_support_sla = fields.Boolean(string="SLA", group='website_support.support_manager', implied_group='website_support.group_website_support_sla')
+    group_website_support_help_groups = fields.Boolean(string="Groups and help pages", group='website_support.support_manager', implied_group='website_support.group_website_support_help_groups')
 
     @api.multi
     def set_values(self):
@@ -37,8 +38,8 @@ class ResConfigSettings(models.TransientModel):
         self.env['ir.default'].set('res.config.settings', 'google_captcha_client_key', self.google_captcha_client_key)
         self.env['ir.default'].set('res.config.settings', 'google_captcha_secret_key', self.google_captcha_secret_key)
         self.env['ir.default'].set('res.config.settings', 'allow_website_priority_set', self.allow_website_priority_set)
-        self.env['ir.default'].set('res.config.settings', 'sla_active', self.sla_active)
-        self.env['ir.default'].set('res.config.settings', 'ghp_active', self.ghp_active)
+        self.env['ir.default'].set('res.config.settings', 'group_website_support_sla', self.group_website_support_sla)
+        self.env['ir.default'].set('res.config.settings', 'group_website_support_help_groups', self.group_website_support_help_groups)
 
     @api.model
     def get_values(self):
@@ -54,7 +55,7 @@ class ResConfigSettings(models.TransientModel):
             max_ticket_attachment_filesize=self.env['ir.default'].get('res.config.settings', 'max_ticket_attachment_filesize'),
             business_hours_id=self.env['ir.default'].get('res.config.settings', 'business_hours_id'),
             allow_website_priority_set=self.env['ir.default'].get('res.config.settings', 'allow_website_priority_set'),
-            sla_active=self.env['ir.default'].get('res.config.settings', 'sla_active'),
-            ghp_active=self.env['ir.default'].get('res.config.settings', 'ghp_active')
+            group_website_support_sla=self.env['ir.default'].get('res.config.settings', 'group_website_support_sla'),
+            group_website_support_help_groups=self.env['ir.default'].get('res.config.settings', 'group_website_support_help_groups')
         )
         return res

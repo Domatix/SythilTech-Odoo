@@ -10,7 +10,7 @@
     'data': [
         'data/ir.module.category.csv',
         'data/res.groups.csv',
-        'data/email_templates.xml',
+        'views/email_templates.xml',
         'security/ir.model.access.csv',
         'security/website_support_security.xml',
         'views/website_support_ticket_templates.xml',

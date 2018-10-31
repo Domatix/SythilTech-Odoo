@@ -36,7 +36,7 @@
                           </div>
 
                         </div>
-                        <h2>Ticket Attachment</h2>
+                        <h2>Tickets</h2>
                         <div class="row mt16 o_settings_container">
                             <div class="col-xs-12 col-md-6 o_setting_box">
                                 <div class="o_setting_left_pane"/>
@@ -65,6 +65,27 @@
                                             <field name="max_ticket_attachment_filesize" />
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                  <field name="google_recaptcha_active"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                  <label for="google_recaptcha_active"/>
+                                  <div class="text-muted">
+                                      Active Google reCAPTCHA for ticket creation
+                                  </div>
+                                  <div class="content-group" attrs="{'invisible': [('google_recaptcha_active' ,'=', False)]}">
+                                      <div class="mt16">
+                                          <label for="google_captcha_client_key"/>
+                                          <field name="google_captcha_client_key"/>
+                                      </div>
+                                      <div class="mt16">
+                                          <label for="google_captcha_secret_key"/>
+                                          <field name="google_captcha_secret_key"/>
+                                      </div>
+                                  </div>
                                 </div>
                             </div>
                         </div>
@@ -118,18 +139,18 @@
 
                         </div>
 
-                        <h2>SLA</h2>
+                        <h2>Performance</h2>
                         <div class="row mt16 o_settings_container">
                             <div class="col-xs-12 col-md-6 o_setting_box">
                                 <div class="o_setting_left_pane">
-                                  <field name="sla_active"/>
+                                  <field name="group_website_support_sla"/>
                                 </div>
                                 <div class="o_setting_right_pane">
-                                  <label for="sla_active"/>
+                                  <label for="group_website_support_sla"/>
                                   <div class="text-muted">
-                                      Active SLA
+                                      Set up your Service Level Agreements to track performance
                                   </div>
-                                  <div class="content-group" attrs="{'invisible': [('sla_active' ,'=', False)]}">
+                                  <div class="content-group" attrs="{'invisible': [('group_website_support_sla' ,'=', False)]}">
                                       <div class="mt16">
                                           <label for="business_hours_id"/>
                                           <field name="business_hours_id"/>
@@ -137,68 +158,39 @@
                                   </div>
                                 </div>
                             </div>
-
-                        </div>
-                        <h2>Groups and help pages</h2>
-                        <div class="row mt16 o_settings_container">
-                            <div class="col-xs-12 col-md-6 o_setting_box">
-                                <div class="o_setting_left_pane">
-                                  <field name="ghp_active"/>
-                                </div>
-                                <div class="o_setting_right_pane">
-                                  <label for="ghp_active"/>
-                                  <div class="text-muted">
-                                      Active Groups and Help pages
-                                  </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <h2>Survey</h2>
-                        <div class="row mt16 o_settings_container">
                             <div class="col-xs-12 col-md-6 o_setting_box">
                                 <div class="o_setting_left_pane">
                                   <field name="auto_send_survey"/>
                                 </div>
                                 <div class="o_setting_right_pane">
                                   <label for="auto_send_survey"/>
+                                  <div class="text-muted">
+                                    Auto send survey when the ticket is closed
+                                  </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <h2>Google reCAPTCHA</h2>
+                        </div>
+                        <h2>Self-Service</h2>
                         <div class="row mt16 o_settings_container">
                             <div class="col-xs-12 col-md-6 o_setting_box">
                                 <div class="o_setting_left_pane">
-                                  <field name="google_recaptcha_active"/>
+                                  <field name="group_website_support_help_groups"/>
                                 </div>
                                 <div class="o_setting_right_pane">
-                                  <label for="google_recaptcha_active"/>
+                                  <label for="group_website_support_help_groups"/>
                                   <div class="text-muted">
-                                      Active Google reCAPTCHA for ticket creation
-                                  </div>
-                                  <div class="content-group" attrs="{'invisible': [('google_recaptcha_active' ,'=', False)]}">
-                                      <div class="mt16">
-                                          <label for="google_captcha_client_key"/>
-                                          <field name="google_captcha_client_key"/>
-                                      </div>
-                                      <div class="mt16">
-                                          <label for="google_captcha_secret_key"/>
-                                          <field name="google_captcha_secret_key"/>
-                                      </div>
+                                      Groups and help pages on your website
                                   </div>
                                 </div>
                             </div>
 
-
-
-                          </div>
-
+                        </div>
                     </div>
               </xpath>
             </field>
       </record>
-    
+
     <record id="website_support_settings_action" model="ir.actions.act_window">
             <field name="name">Settings</field>
             <field name="type">ir.actions.act_window</field>

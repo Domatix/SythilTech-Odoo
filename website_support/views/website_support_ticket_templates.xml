@@ -32,12 +32,15 @@
                       <li id="o_signup"><a href="/support/account/create">Create Account</a></li>
                   </t>
               </t>
-              <t t-if="request.env['ir.default'].get('res.config.settings', 'ghp_active')">
+              <t t-if="request.env['ir.default'].get('res.config.settings', 'group_website_support_help_groups')">
                 <li id="o_help_pages"><a t-attf-href="/support/help" role="menuitem">Help Pages</a></li>
               </t>
               <li id="o_submit_ticket"><a t-attf-href="/support/ticket/submit" role="menuitem">Submit a Ticket</a></li>
               <t t-if="request.env.user.partner_id.name != 'Public user'">
                 <li id="o_submit_ticket"><a t-attf-href="/my/tickets" role="menuitem">My Tickets</a></li>
+              </t>
+              <t t-if="request.env['ir.model.data'].get_object('website_support', 'support_manager').id in request.env.user.groups_id.ids">
+                  <li id="o_website_support_reporting"><a t-attf-href="/support/ticket/reporting" role="menuitem">Reporting</a></li>
               </t>
           </ul>
         </li>
