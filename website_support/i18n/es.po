@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-31 09:20+0000\n"
-"PO-Revision-Date: 2018-10-31 09:20+0000\n"
+"POT-Creation-Date: 2018-10-31 09:55+0000\n"
+"PO-Revision-Date: 2018-10-31 09:55+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -902,6 +902,7 @@ msgstr "Contestado por cliente"
 
 #. module: website_support
 #: model:ir.ui.menu,name:website_support.website_support_parent_menu
+#: model:ir.ui.view,arch_db:website_support.res_config_settings_view_form
 msgid "Customer Support"
 msgstr "Soporte de cliente"
 
@@ -1134,7 +1135,7 @@ msgstr "Historial"
 #: model:ir.model.fields,field_description:website_support.field_website_support_sla_alert_id
 #: model:ir.model.fields,field_description:website_support.field_website_support_sla_id
 #: model:ir.model.fields,field_description:website_support.field_website_support_sla_response_id
-#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_approval_id_10862
+#: model:ir.model.fields,field_description:website_support.field_website_support_ticket_approval_id_11203
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_categories_id
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_close_id
 #: model:ir.model.fields,field_description:website_support.field_website_support_ticket_compose_id
@@ -2034,7 +2035,6 @@ msgstr "Páginas de ayuda del sitio web"
 
 #. module: website_support
 #: model:ir.module.category,name:website_support.support_application
-#: model:ir.ui.view,arch_db:website_support.res_config_settings_view_form
 #: model:ir.ui.view,arch_db:website_support.view_users_form_inherit_website_support
 msgid "Website Support"
 msgstr "Soporte del sitio web"
