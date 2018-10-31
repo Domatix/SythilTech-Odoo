@@ -2037,7 +2037,7 @@ msgstr "Páginas de ayuda del sitio web"
 #: model:ir.module.category,name:website_support.support_application
 #: model:ir.ui.view,arch_db:website_support.view_users_form_inherit_website_support
 msgid "Website Support"
-msgstr "Soporte del sitio web"
+msgstr "Soporte web"
 
 #. module: website_support
 #: model:ir.model,name:website_support.model_website_support_ticket
