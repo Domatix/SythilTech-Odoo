@@ -1,6 +1,6 @@
 {
     'name': "Website Help Desk / Support Ticket",
-    'version': "1.3.10",
+    'version': "1.4.2",
     'author': "Sythil Tech, Adaptive City, Domatix",
     'category': "Tools",
     'support': "steven@sythiltech.com.au",
@@ -9,7 +9,7 @@
     'license': 'LGPL-3',
     'data': [
         'data/ir.module.category.csv',
-        'data/res.groups.csv',
+        'data/res.groups.xml',
         'views/email_templates.xml',
         'security/ir.model.access.csv',
         'security/website_support_security.xml',

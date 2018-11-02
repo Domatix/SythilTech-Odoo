@@ -1,3 +1,34 @@
+v1.4.2
+======
+* Drop-down menu item Support, with the diferents options.
+* Redesign website tickets view moved to Portal account.
+* Redesign of kanban view.
+* Priority with stars.
+* Changed "state" name for "stage".
+* Changed "portal_acces_key" for "access_token".
+* Redesign of settings.
+* SLA, Groups and Help pages in settings for enable/disable.
+
+
+v1.4.1
+======
+* Fix issue with survey link appearing as _survey_url_ in chatter
+
+v1.4.0
+======
+* SLA overhaul to support multiple conditions e.g. Priority = Urgent AND Category = Technical Support
+* Fix Issue with Support Managers access being lost on module update (will apply to future versions)
+* Ability to add image to help groups (optional)
+
+v1.3.12
+=======
+* Department manager access to department contact tickets fix
+* Automatically add category follower to ticket followers
+
+v1.3.11
+=======
+* Ability to assign a customer to a dedicated support staff member
+
 v1.3.10
 =======
 * Help page unpublish / republish
